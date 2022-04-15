@@ -329,6 +329,8 @@ sys_open(void)
   f->off = 0;
   f->readable = !(omode & O_WRONLY);
   f->writable = (omode & O_WRONLY) || (omode & O_RDWR);
+  f->read_bytes = 0;
+  f->write_bytes = 0;
   return fd;
 }
 
@@ -397,8 +399,17 @@ int
 sys_exec(void)
 {
   char *path, *argv[MAXARG];
-  int i;
+  int i, fd;
   uint uargv, uarg;
+  struct proc *curproc = myproc();
+
+  for(fd = 0; fd < NOFILE; fd++){
+      struct file *f = curproc->ofile[fd];
+      if (f != 0){
+          f->read_bytes = 0;
+          f->write_bytes = 0;
+      }
+  }
 
   if(argstr(0, &path) < 0 || argint(1, (int*)&uargv) < 0){
     return -1;
@@ -441,4 +452,15 @@ sys_pipe(void)
   fd[0] = fd0;
   fd[1] = fd1;
   return 0;
+}
+
+int
+sys_getiostats(void)
+{
+    struct file *f;
+    struct iostats *iost;
+
+    if(argfd(0, 0, &f) < 0 || argptr(1, (void*)&iost, sizeof(*iost)) < 0)
+        return -1;
+    return iostat(f, iost);
 }

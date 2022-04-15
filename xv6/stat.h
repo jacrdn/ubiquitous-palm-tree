@@ -1,4 +1,4 @@
-#define T_DIR  1   // Directory
+sys#define T_DIR  1   // Directory
 #define T_FILE 2   // File
 #define T_DEV  3   // Device
 
@@ -8,4 +8,9 @@ struct stat {
   uint ino;    // Inode number
   short nlink; // Number of links to file
   uint size;   // Size of file in bytes
+};
+
+struct iostats {
+    uint read_bytes;   // total bytes read since fd opened/program started
+    uint write_bytes;  // total bytes written since fd opened/program started
 };
